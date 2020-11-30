@@ -1,9 +1,9 @@
 {
-  "name": "vsf-api-plugin-template",
-  "pluginname": "VSF api plugin",
-  "companyname": "",
+  "name": "assortment-list-plugin",
+  "pluginname": "assortment-list-plugin",
+  "companyname": "grupakmk",
   "version": "1.0.0",
-  "description": "Template for VSF api plugin",
+  "description": "Plugin for fetching assortment list from Magento",
   "main": "src/index.js",
   "scripts": {
     "test": "test",
@@ -18,7 +18,7 @@
     "api"
   ],
   "author": {
-    "name": "grupakmk"
+    "name": "meringer"
   },
   "license": "ISC",
   "bugs": {

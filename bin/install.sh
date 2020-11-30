@@ -21,7 +21,7 @@ then
   INSTALLATION_PATH="../../../.."
 else
   echo "Cannot install script. Invalid API structure"
-  exit 1
+  exit 0
 fi;
 
 mkdir -p "$cwd/$INSTALLATION_PATH/vendor/@$COMPANY/$PLUGIN_NAME"
