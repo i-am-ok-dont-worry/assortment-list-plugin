@@ -1,0 +1,36 @@
+{
+  "name": "vsf-api-plugin-template",
+  "pluginname": "VSF api plugin",
+  "companyname": "",
+  "version": "1.0.0",
+  "description": "Template for VSF api plugin",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "test",
+    "postinstall": "sh bin/install.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i-am-ok-dont-worry/vsf-api-plugin-template.git"
+  },
+  "keywords": [
+    "VSF",
+    "api"
+  ],
+  "author": {
+    "name": "grupakmk"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/i-am-ok-dont-worry/vsf-api-plugin-template/issues"
+  },
+  "homepage": "https://github.com/i-am-ok-dont-worry/vsf-api-plugin-template#readme",
+  "devDependencies": {
+    "eslint": "^7.14.0",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.7.0",
+    "eslint-plugin-standard": "^3.1.0"
+  }
+}
