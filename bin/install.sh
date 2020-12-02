@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 cwd=$(pwd)
 
@@ -7,16 +7,16 @@ COMPANY=$(cat package.json | grep companyname | sed 's/.*"companyname": "\(.*\)"
 echo "Installing LSF plugin" $PLUGIN_NAME from $COMPANY "..."
 
 INSTALLATION_PATH="../"
-if [[ -f "../package.json" ]]
+if [ -f "../package.json" ]
 then
   INSTALLATION_PATH="../";
-elif [[ -f "../../package.json" ]]
+elif [ -f "../../package.json" ]
 then
   INSTALLATION_PATH="../.."
-elif [[ -f "../../../package.json" ]]
+elif [ -f "../../../package.json" ]
 then
   INSTALLATION_PATH="../../.."
-elif [[ -f "../../../../package.json" ]]
+elif [ -f "../../../../package.json" ]
 then
   INSTALLATION_PATH="../../../.."
 else
