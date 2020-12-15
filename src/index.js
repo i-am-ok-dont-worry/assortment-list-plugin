@@ -1,3 +1,5 @@
+const ElasticMapper = require('./utils/es-product-mapper');
+
 /**
  * This plugin allows to fetch assortment list from Magento
  * per customer.
@@ -9,7 +11,7 @@ module.exports = ({ config, db, router, cache, apiStatus, apiError, getRestApiCl
     const client = getRestApiClient();
     client.addMethods('assortmentList', (restClient) => {
       const module = {};
-      module.get = (customerId) => {
+      module.get = (customerId, token) => {
         return restClient.get(`/kmk-customer/assortments/${customerId}/search?searchCriteria`);
       };
 
@@ -22,18 +24,27 @@ module.exports = ({ config, db, router, cache, apiStatus, apiError, getRestApiCl
   router.get('/:customerId', async (req, res) => {
     try {
       const {customerId} = req.params;
+      const {token, storeCode} = req.query;
       if (!customerId) { throw new Error(`Customer id is required`); }
 
       const client = createMage2RestClient();
-      cache.get(req, ['assortment-list'], client.assortmentList.get, customerId)
-        .then(assortments => {
-          apiStatus(res, assortments, 200);
+      cache.get(req, ['assortment-list'], client.assortmentList.get, customerId, token)
+        .then(async response => {
+          try {
+            const {items} = response;
+            const es = new ElasticMapper(db, config, storeCode);
+            const decoratedProducts = await es.decorateProducts(items);
+
+            apiStatus(res, decoratedProducts, 200);
+          } catch (e) {
+            apiStatus(res, response, 200);
+          }
         })
         .catch(err => {
-          apiError(res, `Assortments not found`);
+          apiError(res, err.message || err || `Assortments not found`);
         })
-    } catch (e) {
-
+    } catch (err) {
+      apiError(res, { code: 401, errorMessage: err.message || err || 'Assortnents error' });
     }
   });
 
