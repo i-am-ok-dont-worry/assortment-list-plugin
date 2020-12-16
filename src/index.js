@@ -12,7 +12,7 @@ module.exports = ({ config, db, router, cache, apiStatus, apiError, getRestApiCl
     client.addMethods('assortmentList', (restClient) => {
       const module = {};
       module.get = (customerId, token) => {
-        return restClient.get(`/kmk-customer/assortments/${customerId}/search?searchCriteria`);
+        return restClient.get(`/kmk-customer/assortments/${customerId}/search?searchCriteria`, token);
       };
 
       return module;
@@ -28,7 +28,7 @@ module.exports = ({ config, db, router, cache, apiStatus, apiError, getRestApiCl
       if (!customerId) { throw new Error(`Customer id is required`); }
 
       const client = createMage2RestClient();
-      cache.get(req, ['assortment-list'], client.assortmentList.get, customerId, token)
+      cache.get(req, [`assortments-${customerId}`], client.assortmentList.get, customerId, token)
         .then(async response => {
           try {
             const {items} = response;
@@ -45,6 +45,30 @@ module.exports = ({ config, db, router, cache, apiStatus, apiError, getRestApiCl
         })
     } catch (err) {
       apiError(res, { code: 401, errorMessage: err.message || err || 'Assortnents error' });
+    }
+  });
+
+  router.post('/:customerId', async (req, res) => {
+    const {customerId} = req.params;
+    const {token} = req.query;
+
+    try {
+      if (!token) { throw new Error('Cannot invalidate'); }
+      if (!customerId) { throw new Error(`Customer id is required`); }
+
+      const client = createMage2RestClient();
+      client.assortmentList.get(customerId, token)
+        .then(async response => {
+          await cache.set(req.url, response, [`assortments-${customerId}`]);
+          apiStatus(res, { message: 'ok' });
+        })
+        .catch(async () => {
+          await cache.getCacheInstance().invalidate(`assortments-${customerId}`);
+          apiStatus(res, { message: 'ok' });
+        });
+    } catch (e) {
+      await cache.getCacheInstance().invalidate(`assortments-${customerId}`);
+      apiError(res, e);
     }
   });
 

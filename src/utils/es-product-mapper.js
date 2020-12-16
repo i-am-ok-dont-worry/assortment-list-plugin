@@ -22,25 +22,38 @@ class ElasticsearchProductMapper {
         }
       }
     })
-      .then(res => {
-        const { hits: resp } = res.body;
-        const docs = resp.hits.map(doc => doc._source);
+        .then(res => {
+          const { hits: resp } = res.body;
+          const docs = resp.hits.map(doc => doc._source);
 
-        // Decorate assortment list products which only contains partial
-        // product info with full ElasticSearch product data
-        let output = assortmentProducts.reduce((acc, next) => {
-          const { product_id: productId, ...rest } = next;
-          const esProduct = docs.find(p => p.id === productId);
-          return [...acc, { ...rest, ...esProduct }];
-        }, []);
+          // Decorate assortment list products which only contains partial
+          // product info with full ElasticSearch product data
+          let output = assortmentProducts.reduce((acc, next) => {
+            const { product_id: productId, ...rest } = next;
+            const esProduct = docs.find(p => p.id === productId);
+            return [...acc, { ...rest, ...esProduct }];
+          }, []);
 
-        return output;
-      });
+          return output;
+        });
+  }
+
+  setIndex (storeCode, config) {
+    if (storeCode) {
+      const storeView = config.storeViews[storeCode];
+      if (storeView && storeView.hasOwnProperty('elasticsearch')) {
+        this.index = storeView.elasticsearch.index;
+      } else if (config.hasOwnProperty('elasticsearch')) {
+        this.index = config.elasticsearch.index;
+      }
+    } else {
+      this.index = config.elasticsearch.index;
+    }
   }
 
   constructor (db, config, storeCode) {
     this.es = db.getElasticClient();
-    this.index = storeCode ? (config.storeViews[storeCode].elasticsearch.index || config.elasticsearch.index) : config.elasticsearch.index;
+    this.setIndex(storeCode, config);
   }
 }
 
