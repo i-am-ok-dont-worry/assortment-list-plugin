@@ -35,7 +35,7 @@ module.exports = ({ config, db, router, cache, apiStatus, apiError, getRestApiCl
             const es = new ElasticMapper(db, config, storeCode);
             const decoratedProducts = await es.decorateProducts(items);
 
-            apiStatus(res, { items: decoratedProducts || [] }, 200);
+            apiStatus(res, decoratedProducts || [], 200);
           } catch (e) {
             apiStatus(res, response, 200);
           }
