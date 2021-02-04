@@ -1,4 +1,5 @@
-const ElasticMapper = require('./utils/es-product-mapper');
+const ElasticsearchProductMapper = require('es-product-decorator');
+const SearchCriteria = require('magento-searchcriteria-builder');
 
 /**
  * This plugin allows to fetch assortment list from Magento
@@ -11,8 +12,13 @@ module.exports = ({ config, db, router, cache, apiStatus, apiError, getRestApiCl
     const client = getRestApiClient();
     client.addMethods('assortmentList', (restClient) => {
       const module = {};
-      module.get = (customerId, token) => {
-        return restClient.get(`/kmk-customer/assortments/${customerId}/search?searchCriteria`, token);
+      module.get = ({ customerId, sortBy, sortDir, pageSize, currentPage, token }) => {
+        const url = `/kmk-customer/assortments/${customerId}/search`;
+        const query = new SearchCriteria();
+        query.applySort(sortBy, sortDir);
+        query.setCurrentPage(currentPage);
+        query.setPageSize(pageSize);
+        return restClient.get(url + '?' + query.build(), token);
       };
 
       return module;
@@ -21,18 +27,27 @@ module.exports = ({ config, db, router, cache, apiStatus, apiError, getRestApiCl
     return client;
   };
 
+  /**
+   * Returns list of assortments per customer
+   * @req.param.customerId Customer id
+   * @req.query.sort - Sort by
+   * @req.query.sortDir {asc|desc} - Sort direction
+   * @req.query.start - Page number
+   * @req.query.token - User token
+   * @req.query.storeCode - Store code
+   */
   router.get('/:customerId', async (req, res) => {
     try {
-      const {customerId} = req.params;
-      const {token, storeCode} = req.query;
+      const { customerId } = req.params;
+      const { token, storeCode, ...restParams } = req.query;
       if (!customerId) { throw new Error(`Customer id is required`); }
 
       const client = createMage2RestClient();
-      cache.get(req, [`assortments-${customerId}`], client.assortmentList.get, customerId, token)
+      cache.get(req, [`assortments-${customerId}`], client.assortmentList.get, { customerId, token, ...restParams })
         .then(async response => {
           try {
             const {items} = response;
-            const es = new ElasticMapper(db, config, storeCode);
+            const es = new ElasticsearchProductMapper(db, config, storeCode);
             const decoratedProducts = await es.decorateProducts(items);
 
             apiStatus(res, decoratedProducts || [], 200);
