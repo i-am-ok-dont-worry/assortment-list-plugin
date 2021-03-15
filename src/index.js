@@ -16,8 +16,8 @@ module.exports = ({ config, db, router, cache, apiStatus, apiError, getRestApiCl
         const url = `/kmk-customer/assortments/${customerId}/search`;
         const query = new SearchCriteria();
         query.applySort(sortBy, sortDir);
-        query.setCurrentPage(currentPage);
-        query.setPageSize(pageSize);
+        // query.setCurrentPage(currentPage);
+        // query.setPageSize(pageSize);
         return restClient.get(url + '?' + query.build(), token);
       };
 
